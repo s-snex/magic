@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Analisis 4-Digit (10 Pendekatan, 4 Opsi) - Perbaikan Hide/Show</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 900px;
+    }
+    h1, h2, h3 {
+      margin-bottom: 8px;
+    }
+    textarea, input, select {
+      width: 100%;
+      margin: 5px 0 10px 0;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .section {
+      border: 1px solid #ccc;
+      background: #fafafa;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    .analysis-compare-box {
+      border: 1px solid #999;
+      background: #fff;
+      margin-top: 10px;
+      padding: 10px;
+      line-height: 1.4em;
+    }
+    .analysis-compare-box strong {
+      font-weight: bold;
+    }
+    .match-summary-box {
+      border: 1px solid #666;
+      background: #ffffe0;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    /* Tombol kecil untuk hide/show */
+    .toggle-btn {
+      margin-left: 10px;
+      font-size: 12px;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Analisis 4-Digit (10 Pendekatan, 4 Opsi) - Perbaikan Hide/Show</h1>
+
+<!-- SECTION: Input Data & Proses -->
+<div class="section">
+  <h2>Data Input</h2>
+  <textarea id="inputData" rows="5" placeholder="misal:\n6998\n5379\n3454\n4707\n3880\n2047"></textarea>
+  <br/>
+  <label for="inputCount">Jumlah baris (chunk) dari bawah:</label>
+  <input type="number" id="inputCount" placeholder="3" />
+  <button onclick="prosesData()">Proses Data</button>
+  <button onclick="analyzeOutputs()">Analisa Keluaran</button>
+</div>
+
+<!-- BAGIAN: Hasil Analisis (Pendekatan & Opsi) => Hide/Show -->
+<div class="section">
+  <h2>
+    Hasil Analisis (Pendekatan &amp; Opsi)
+    <button class="toggle-btn" onclick="toggleVisibility('analysisOutput')">Hide/Show</button>
+  </h2>
+  <!-- Default ditampilkan (display:block) -->
+  <div id="analysisOutput" style="display:block;"></div>
+</div>
+
+<!-- BAGIAN: Hasil Analisa Keluaran => Hide/Show, 
+     TAPI RINGKASAN (Kecocokan Digit) TETAP SELALU TAMPIL -->
+<div class="section">
+  <h2>
+    Hasil Analisa Keluaran (Hanya Pendekatan &amp; Opsi yang SAMA Digit)
+    <button class="toggle-btn" onclick="toggleVisibility('analysisCompareMatch')">Hide/Show</button>
+  </h2>
+  <!-- Bagian "Sama Digit" -->
+  <div id="analysisCompareMatch" style="display:block;"></div>
+
+  <!-- Ringkasan Kecocokan Digit => SELALU TAMPIL, TIDAK DI-HIDE -->
+  <div id="analysisCompareSummary" style="margin-top:10px;"></div>
+</div>
+
+<script>
+// ================ GLOBAL VARS ================
+let parsedResults = [];
+
+// ================ FUNGSI UTAMA ================
+function prosesData(){
+  const txt = document.getElementById('inputData').value.trim();
+  if(!txt){
+    alert("Masukkan data 4-digit dulu.");
+    return;
+  }
+  parsedResults=[];
+  const lines= txt.split(/\r?\n/);
+  lines.forEach(line=>{
+    const clean=line.trim();
+    if(/^\d{4}$/.test(clean)){
+      parsedResults.push(clean);
+    }
+  });
+  if(parsedResults.length===0){
+    alert("Tidak ada baris valid (4 digit).");
+    return;
+  }
+
+  // Tampilkan ringkasan 10 pendekatan
+  renderAnalysis();
+}
+
+function analyzeOutputs(){
+  if(parsedResults.length===0){
+    alert("Belum ada data valid. Klik 'Proses Data' dulu.");
+    return;
+  }
+  const count = parseInt(document.getElementById('inputCount').value)||0;
+  if(count<=0 || count>=parsedResults.length){
+    alert("Jumlah chunk minimal 1 & < total baris data.");
+    return;
+  }
+
+  const matchDiv = document.getElementById("analysisCompareMatch");
+  const summaryDiv = document.getElementById("analysisCompareSummary");
+
+  matchDiv.innerHTML="";
+  summaryDiv.innerHTML="";
+
+  // REKAP approachOptionPosCounts => [10 pendekatan][4 opsi][4 pos(A,B,C,D)]
+  let approachOptionPosCounts = [];
+  for(let p=0;p<10;p++){
+    approachOptionPosCounts[p]=[];
+    for(let o=0;o<4;o++){
+      approachOptionPosCounts[p][o]=[0,0,0,0];
+    }
+  }
+
+  // SLIDING
+  let analysisCount=0;
+  for(let i=(parsedResults.length-count-1); i>=0; i--){
+    let chunkStart=i+1;
+    let chunkEnd=i+1+count;
+    if(chunkEnd>parsedResults.length) continue;
+
+    let chunkArr = parsedResults.slice(chunkStart, chunkEnd);
+    let lineToCompareStr = parsedResults[i];
+    let lineToCompareArr = lineToCompareStr.split("").map(x=>parseInt(x));
+
+    let approachRes = getAllApproachCandidates(chunkArr);
+
+    let matchLines=[];
+    for(let p=0;p<10;p++){
+      let approachName = getApproachName(p);
+      let arrOpsi = approachRes[p];
+      for(let o=0;o<4;o++){
+        let candidate = arrOpsi[o];
+        if(!candidate) continue; 
+        // check same digits
+        let samePos = getSamePositions(candidate, lineToCompareArr);
+        if(samePos.length>0){
+          let posStr = samePos.map(posI => "ABCD"[posI]+":"+candidate[posI]).join(", ");
+          matchLines.push(`P#${p+1}(${approachName}) Opsi${o+1}: [${candidate.join(" ")}] => ${posStr}`);
+          // rekap
+          samePos.forEach(posI=>{
+            approachOptionPosCounts[p][o][posI]++;
+          });
+        }
+      }
+    }
+
+    if(matchLines.length>0){
+      analysisCount++;
+      let box=`<div class="analysis-compare-box">`;
+      box+= `<strong>Analisa #${analysisCount}:</strong> ${lineToCompareStr}<br/>`;
+      matchLines.forEach(ml=>{
+        box+= ml+"<br/>";
+      });
+      box+= `</div>`;
+      matchDiv.innerHTML+= box;
+    }
+  }
+
+  if(analysisCount===0){
+    matchDiv.innerHTML=`<div class="analysis-compare-box">Tidak ada baris yang sama digit.</div>`;
+  }
+
+  // RINGKASAN -> Tanpa "Terbanyak" / "Tersedikit"
+  let sumHtml = `<div class="match-summary-box">`;
+  sumHtml+= `<h4>Ringkasan Kecocokan Digit (10 Pendekatan, 4 Opsi)</h4>`;
+
+  for(let p=0;p<10;p++){
+    let approachName = getApproachName(p);
+    for(let o=0;o<4;o++){
+      // skip Pendekatan #1 Opsi2..4
+      if(p===0 && o>0) continue;
+
+      let arrPos= approachOptionPosCounts[p][o];
+      let sum= arrPos.reduce((a,b)=>a+b,0);
+      sumHtml+= `<p>`;
+      sumHtml+= `<strong>P#${p+1}(${approachName}) Opsi${o+1}: ${sum} total digit sama</strong><br/>`;
+      sumHtml+= `A=${arrPos[0]}, B=${arrPos[1]}, C=${arrPos[2]}, D=${arrPos[3]}`;
+      sumHtml+= `</p>`;
+    }
+  }
+  sumHtml+= `</div>`;
+
+  // sisipkan ringkasan
+  summaryDiv.innerHTML+= sumHtml;
+
+  // TAMBAHKAN "ANGKA 4 JARANG PER POSISI" (dari approachOptionPosCounts)
+  summaryDiv.innerHTML+= show4JarangFromRingkasan(approachOptionPosCounts);
+}
+
+// ============ FUNGSI "ANGKA 4 JARANG" DARI approachOptionPosCounts ============
+function show4JarangFromRingkasan(approachOptionPosCounts){
+  // Kita interpretasi "4 jarang" = 4 data (pendekatan, opsi) dgn nilai kecocokan terkecil
+  // per posisi (A/B/C/D).
+  // skip Pendekatan #1 Opsi2..4
+  const posName=["A","B","C","D"];
+  let html= `<div class="match-summary-box" style="margin-top:12px;">`;
+  html+= `<h4>Angka 4 Jarang pada Posisi (A/B/C/D)</h4>`;
+
+  for(let pos=0; pos<4; pos++){
+    // kumpulkan (p,o,count)
+    let list=[];
+    for(let p=0; p<10; p++){
+      for(let o=0; o<4; o++){
+        if(p===0 && o>0) continue; // skip #1 Opsi2..4
+        let arrPos= approachOptionPosCounts[p][o];
+        if(!arrPos) continue;
+        let val= arrPos[pos];
+        list.push({p,o,count: val});
+      }
+    }
+    // urut ascending by count
+    list.sort((a,b)=> a.count - b.count);
+    let slice4= list.slice(0,4);
+
+    html+= `<p>Posisi ${posName[pos]} - 4 jarang (nilai terendah):</p>`;
+    if(slice4.length===0){
+      html+= `<div>(Tidak ada data)</div>`;
+      continue;
+    }
+    slice4.forEach(item=>{
+      let approachName= getApproachName(item.p);
+      html+= `<div>- P#${item.p+1}(${approachName}) Opsi${item.o+1} => ${item.count}</div>`;
+    });
+  }
+
+  html+= `</div>`;
+  return html;
+}
+
+// ============ FUNGSI RENDER "Hasil Analisis (Pendekatan & Opsi)" ============
+function renderAnalysis(){
+  const container = document.getElementById('analysisOutput');
+  container.innerHTML="";
+
+  let allApproaches = getAllApproachCandidates(parsedResults);
+  let html=`<h3>10 Pendekatan (4 Opsi per Pendekatan) — #1 hanya 1 opsi</h3>`;
+  for(let p=0;p<allApproaches.length;p++){
+    let approachName= getApproachName(p);
+    let arrOpsi= allApproaches[p];
+    html+= `<div style="border:1px dashed #ccc; margin:8px 0; padding:5px;">`;
+    html+= `<strong>P#${p+1} - ${approachName}</strong><br/>`;
+    for(let o=0;o<4;o++){
+      let candidate= arrOpsi[o];
+      html+= `Opsi${o+1}: ${fmt4Digits(candidate)}<br/>`;
+    }
+    html+= `</div>`;
+  }
+
+  container.innerHTML= html;
+}
+
+// ============ HELPER ===============
+function toggleVisibility(id){
+  const el= document.getElementById(id);
+  if(el.style.display==='none'){
+    el.style.display='block';
+  } else {
+    el.style.display='none';
+  }
+}
+function getSamePositions(candidateArr, lineArr){
+  let out=[];
+  for(let i=0;i<4;i++){
+    if(candidateArr[i]===lineArr[i]) out.push(i);
+  }
+  return out;
+}
+function fmt4Digits(arr){
+  if(!arr||arr.length<4)return "A:- B:- C:- D:-";
+  return `A:${arr[0]} B:${arr[1]} C:${arr[2]} D:${arr[3]}`;
+}
+
+// ============ BERI NAMA BAGUS PDEKATAN #7-#10 ============
+// #7 => "Digit Parity Expansion"
+// #8 => "Half-Swap Variation"
+// #9 => "Digit-Sum Injection"
+// #10 => "Rolling Shifts"
+
+function getApproachName(pIndex){
+  switch(pIndex){
+    case 0: return "Frekuensi Posisi (1 Opsi)";
+    case 1: return "Delta";
+    case 2: return "Mirror";
+    case 3: return "Siklus";
+    case 4: return "Fixed Cross";
+    case 5: return "Rotasi & Sliding";
+    case 6: return "Digit Parity Expansion";
+    case 7: return "Half-Swap Variation";
+    case 8: return "Digit-Sum Injection";
+    case 9: return "Rolling Shifts";
+    default: return "???";
+  }
+}
+
+// ============ 10 Pendekatan (semua deterministik) ============
+function getAllApproachCandidates(dataArr){
+  let arr=[];
+  arr.push( approach1FreqPos1Opsi(dataArr) );  // #1
+  arr.push( approach2Delta4(dataArr) );        // #2
+  arr.push( approach3Mirror4(dataArr) );       // #3
+  arr.push( approach4Siklus4(dataArr) );       // #4
+  arr.push( approach5FixedCross4(dataArr) );   // #5
+  arr.push( approach6RotateSlide4(dataArr) );  // #6
+  arr.push( approach7ParityExpansion(dataArr) );     // #7
+  arr.push( approach8HalfSwap(dataArr) );            // #8
+  arr.push( approach9DigitSumInjection(dataArr) );   // #9
+  arr.push( approach10RollingShifts(dataArr) );      // #10
+  return arr;
+}
+
+// #1 => Frekuensi Posisi (1 Opsi)
+function approach1FreqPos1Opsi(dataArr){
+  if(dataArr.length<1)return [null,null,null,null];
+  let freqPos=[ Array(10).fill(0), Array(10).fill(0), Array(10).fill(0), Array(10).fill(0) ];
+  dataArr.forEach(dStr=>{
+    for(let i=0;i<4;i++){
+      freqPos[i][ parseInt(dStr[i]) ]++;
+    }
+  });
+  let arr1=[];
+  for(let i=0;i<4;i++){
+    let row= freqPos[i];
+    let minVal= Math.min(...row);
+    let cands=[];
+    for(let d=0; d<10; d++){
+      if(row[d]===minVal) cands.push(d);
+    }
+    if(cands.length===0) arr1.push(0);
+    else if(cands.length===1) arr1.push(cands[0]);
+    else {
+      cands.sort((a,b)=>a-b);
+      arr1.push(cands[0]);
+    }
+  }
+  return [arr1,null,null,null];
+}
+
+// #2 => Delta
+function approach2Delta4(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<2)return out;
+  let curr=dataArr[0];
+  let prev=dataArr[1];
+  let a1=[], a2=[], a3=[], a4=[];
+  for(let i=0;i<4;i++){
+    let cd=parseInt(curr[i]);
+    let pd=parseInt(prev[i]);
+    let delta=(cd-pd+10)%10;
+    a1.push((cd+delta)%10);
+    a2.push((cd-delta+10)%10);
+    a3.push((cd+ 2*delta)%10);
+    a4.push((cd- 2*delta+10)%10);
+  }
+  out[0]=a1; out[1]=a2; out[2]=a3; out[3]=a4;
+  return out;
+}
+// #3 => Mirror
+function approach3Mirror4(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  let digits=dataArr[0].split("").map(x=>parseInt(x));
+  if(digits.length<4)return out;
+
+  out[0]= [digits[3], digits[2], digits[1], digits[0]]; 
+  out[1]= [digits[1], digits[2], digits[3], digits[0]];
+  out[2]= [digits[3], digits[0], digits[1], digits[2]];
+  out[3]= [digits[1], digits[0], digits[3], digits[2]];
+  return out;
+}
+// #4 => Siklus
+function approach4Siklus4(dataArr){
+  let out=[null,null,null,null];
+  for(let i=1;i<=4;i++){
+    if(dataArr.length>=i+0){
+      out[i-1] = dataArr[i]? dataArr[i].split("").map(x=>parseInt(x)) : null;
+    }
+  }
+  return out;
+}
+// #5 => Fixed Cross
+function approach5FixedCross4(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  let f=dataArr[0].split("").map(x=>parseInt(x));
+  let l=dataArr[dataArr.length-1].split("").map(x=>parseInt(x));
+  out[0]= [f[0], l[1], f[2], l[3]];
+  out[1]= [l[0], f[1], l[2], f[3]];
+  out[2]= [f[0], f[1], l[2], l[3]];
+  out[3]= [l[0], l[1], f[2], f[3]];
+  return out;
+}
+// #6 => Rotasi & Sliding
+function approach6RotateSlide4(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  function rotate1(str4){
+    let [A,B,C,D]= str4.split("").map(x=>parseInt(x));
+    return [B,A,(C+1)%10,(D+9)%10];
+  }
+  function rotate2(str4){
+    let [A,B,C,D]= str4.split("").map(x=>parseInt(x));
+    return [(B+2)%10,(A+2)%10,(C+2)%10,(D+8)%10];
+  }
+  out[0]= rotate1(dataArr[0]);
+  if(dataArr.length>=2) out[1]= rotate1(dataArr[1]);
+  out[2]= rotate2(dataArr[0]);
+  if(dataArr.length>=2) out[3]= rotate2(dataArr[1]);
+  return out;
+}
+
+// #7 => Digit Parity Expansion
+function approach7ParityExpansion(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  let arr0=dataArr[0].split("").map(x=>parseInt(x));
+  let a1= arr0.map(d=> (d%2===0)? (d+1)%10 : d);
+  let a2= arr0.map(d=> (d%2!==0)? (d+2)%10 : d);
+  let a3= arr0.map(d=> (d%2===0)? (d+9)%10 : (d+1)%10);
+  let a4= arr0.map(d=> 9-d);
+  out[0]=a1; out[1]=a2; out[2]=a3; out[3]=a4;
+  return out;
+}
+
+// #8 => Half-Swap Variation
+function approach8HalfSwap(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  let arr0=dataArr[0].split("").map(x=>parseInt(x));
+  if(arr0.length<4)return out;
+
+  // Opsi1 => (C,D,A,B)
+  out[0]= [arr0[2],arr0[3],arr0[0],arr0[1]];
+  // Opsi2 => (C+1, D+1, A+1, B+1)
+  out[1]= [(arr0[2]+1)%10,(arr0[3]+1)%10,(arr0[0]+1)%10,(arr0[1]+1)%10];
+  // Opsi3 => (A+5, B+5, C+5, D+5) mod10
+  out[2]= [(arr0[0]+5)%10,(arr0[1]+5)%10,(arr0[2]+5)%10,(arr0[3]+5)%10];
+  // Opsi4 => (A, C, B, D)
+  out[3]= [arr0[0], arr0[2], arr0[1], arr0[3]];
+  return out;
+}
+
+// #9 => Digit-Sum Injection
+function approach9DigitSumInjection(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  let arr0=dataArr[0].split("").map(x=>parseInt(x));
+  let sumD= arr0.reduce((a,b)=>a+b,0);
+
+  let a1=[...arr0]; a1[0]=(a1[0]+sumD)%10;
+  let a2=[...arr0]; a2[1]=(a2[1]+sumD)%10;
+  let a3=[...arr0]; a3[2]=(a3[2]+sumD)%10;
+  let a4=[...arr0]; a4[3]=(a4[3]+sumD)%10;
+  out[0]= a1; out[1]= a2; out[2]= a3; out[3]= a4;
+  return out;
+}
+
+// #10 => Rolling Shifts
+function approach10RollingShifts(dataArr){
+  let out=[null,null,null,null];
+  if(dataArr.length<1)return out;
+  let arr0=dataArr[0].split("").map(x=>parseInt(x));
+  if(arr0.length<4)return out;
+
+  // Opsi1 => roll left by 1 => (B,C,D,A)
+  out[0]= [arr0[1],arr0[2],arr0[3],arr0[0]];
+  // Opsi2 => roll left by 2 => (C,D,A,B)
+  out[1]= [arr0[2],arr0[3],arr0[0],arr0[1]];
+  // Opsi3 => roll right by 1 => (D,A,B,C)
+  out[2]= [arr0[3],arr0[0],arr0[1],arr0[2]];
+  // Opsi4 => custom => (B,A,D,C)
+  out[3]= [arr0[1],arr0[0],arr0[3],arr0[2]];
+  return out;
+}
+</script>
+
+</body>
+</html>
