@@ -23,6 +23,7 @@
       --gold: #f1c40f;
       --success: #27ae60;
       --danger: #e74c3c;
+      --violet: #6f42c1;
     }
 
     * {
@@ -202,6 +203,7 @@
     .btn-logika { background: var(--blue); }
     .btn-copycat { background: #e67e22; }
     .btn-range { background: var(--amber); }
+    .btn-kandidat { background: var(--violet); }
 
     .btn-twn {
       width: 100%;
@@ -271,6 +273,17 @@
       margin: 5px 0;
     }
 
+    .badge-rule {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #ede7f6;
+      color: var(--violet);
+      border: 1px solid #d5c6f3;
+    }
+
     @media (max-width: 980px) {
       .grid-layout {
         grid-template-columns: 1fr;
@@ -286,7 +299,6 @@
     </div>
 
     <div class="grid-layout">
-      <!-- KOLOM KIRI: FILTER -->
       <div class="card">
         <h2>FILTER ANGKA 4D - MASTER BUILDER PRO</h2>
 
@@ -295,7 +307,7 @@
 
         <span class="section-label" style="color: var(--orange); font-size: 14px;">⚡ Tombol Pintas (Macro)</span>
         <button class="btn-twn" onclick="eksekusiFilter('TWN')">
-          🚀 EKSEKUSI TWN (Auto Hapus: Paritas Ekstrim + Total &lt;10/&gt;26 + Range &lt;4)
+          🚀 EKSEKUSI TWN (Auto Hapus: Paritas Ekstrim + Total &lt;10 / &gt;26 + Range &lt;4)
         </button>
 
         <span class="section-label">1. Posisi Kembar (Twin)</span>
@@ -444,6 +456,23 @@
           <button class="btn-range" onclick="eksekusiFilter('hapusRange')">Hapus Range Sempit</button>
         </div>
 
+        <span class="section-label">9. Filter Modulo Fleksibel</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--violet);">
+          Modulo:
+          <input type="number" id="inputModuloBase" class="input-mini" value="5" min="2" placeholder="5">
+
+          Hapus residu:
+          <input type="text" id="inputModuloBuang" class="input-text" value="4" placeholder="contoh: 4 atau 0,4" style="width:180px;">
+
+          <button class="btn-kandidat" onclick="eksekusiFilter('moduloCustom')">
+            Eksekusi Modulo
+          </button>
+
+          <span style="width:100%; font-size:12px; color:#666;">
+            Contoh Kandidat A: modulo 5, hapus residu 4
+          </span>
+        </div>
+
         <span class="section-label">Hasil Filter</span>
         <div class="hasil-box" id="outputHasil">Menunggu data...</div>
 
@@ -456,7 +485,6 @@
         <button class="btn-reset" onclick="resetSemuaFilter()">RESET FILTER</button>
       </div>
 
-      <!-- KOLOM KANAN: BALIK URUTAN -->
       <div class="card">
         <h2>Balik Urutan Angka 4 Digit</h2>
 
@@ -484,9 +512,6 @@
   </div>
 
   <script>
-    // =========================
-    // FILTER 4D
-    // =========================
     let dataAktif = [];
 
     function inisialisasiData() {
@@ -540,6 +565,9 @@
       let copycatStr = document.getElementById("inputCopycat").value.trim();
       let valRange = parseInt(document.getElementById("inputRange").value);
 
+      let moduloBase = parseInt(document.getElementById("inputModuloBase").value);
+      let moduloBuangRaw = document.getElementById("inputModuloBuang").value.trim();
+
       if (tipe === "posisiSama" && p1 === p2) {
         alert("Pilih 2 posisi berbeda!");
         return;
@@ -559,6 +587,17 @@
         }
         if (copycatStr.length !== 2 || isNaN(parseInt(copycatStr))) {
           alert("Masukkan tepat 2 angka jiplakan (contoh: 03)!");
+          return;
+        }
+      }
+      if (tipe === "moduloCustom") {
+        if (isNaN(moduloBase) || moduloBase < 2) {
+          alert("Isi angka modulo minimal 2!");
+          return;
+        }
+
+        if (!moduloBuangRaw) {
+          alert("Isi residu yang ingin dibuang! Contoh: 4 atau 0,4");
           return;
         }
       }
@@ -660,12 +699,26 @@
             }
             return range >= valRange;
 
+          case "moduloCustom":
+            let arrResiduBuang = moduloBuangRaw
+              .split(",")
+              .map(n => parseInt(n.trim()))
+              .filter(n => !isNaN(n) && n >= 0 && n < moduloBase);
+
+            if (arrResiduBuang.length === 0) {
+              alert("Residu yang dibuang tidak valid!");
+              return true;
+            }
+
+            return !arrResiduBuang.includes(totalSum % moduloBase);
+
           default:
             return true;
         }
       });
 
-      document.getElementById("notif").innerText = `Baru saja dihapus: ${jumlahAwal - dataAktif.length} kombinasi`;
+      document.getElementById("notif").innerText =
+        `Baru saja dihapus: ${jumlahAwal - dataAktif.length} kombinasi`;
       tampilkanKeLayar();
     }
 
@@ -691,9 +744,6 @@
         .catch(() => alert("Gagal menyalin hasil filter."));
     }
 
-    // =========================
-    // BALIK URUTAN
-    // =========================
     function prosesDataReverse() {
       let input = document.getElementById("inputTextReverse").value.trim();
       let angka4d = input.match(/\b\d{4}\b/g);
