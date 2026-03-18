@@ -2,513 +2,727 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>Analisis 4-Digit (10 Pendekatan, 4 Opsi) - Perbaikan Hide/Show</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tools Angka 4D - Filter & Balik Urutan</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 900px;
+    :root {
+      --bg: #e9ecef;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --muted: #6c757d;
+      --border: #dee2e6;
+      --shadow: 0 6px 20px rgba(0,0,0,0.08);
+
+      --dark: #34495e;
+      --orange: #d35400;
+      --purple: #8e44ad;
+      --green: #16a085;
+      --red: #c0392b;
+      --blue: #2980b9;
+      --amber: #f39c12;
+      --gold: #f1c40f;
+      --success: #27ae60;
+      --danger: #e74c3c;
     }
-    h1, h2, h3 {
-      margin-bottom: 8px;
-    }
-    textarea, input, select {
-      width: 100%;
-      margin: 5px 0 10px 0;
-      padding: 6px;
+
+    * {
       box-sizing: border-box;
     }
-    button {
-      margin-top: 10px;
-      padding: 8px 14px;
-      font-size: 14px;
-      cursor: pointer;
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: #333;
     }
-    .section {
-      border: 1px solid #ccc;
-      background: #fafafa;
-      padding: 10px;
+
+    .wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-title {
+      text-align: center;
+      color: var(--text);
       margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 800;
     }
-    .analysis-compare-box {
-      border: 1px solid #999;
-      background: #fff;
-      margin-top: 10px;
-      padding: 10px;
-      line-height: 1.4em;
+
+    .top-note {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 25px;
+      font-size: 14px;
     }
-    .analysis-compare-box strong {
-      font-weight: bold;
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
     }
-    .match-summary-box {
-      border: 1px solid #666;
-      background: #ffffe0;
-      margin-top: 10px;
-      padding: 10px;
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 22px;
     }
-    /* Tombol kecil untuk hide/show */
-    .toggle-btn {
-      margin-left: 10px;
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 22px;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .section-label {
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 6px;
       font-size: 12px;
-      padding: 2px 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text);
+    }
+
+    textarea,
+    .hasil-box,
+    .output-box {
+      width: 100%;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      border: 2px solid #ccc;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+      background: #fcfcfc;
+    }
+
+    .hasil-box {
+      min-height: 140px;
+      background: #212529;
+      color: #00ff66;
+      border-left: 5px solid var(--success);
+      font-family: Consolas, monospace;
+      font-size: 16px;
+      line-height: 1.5;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    .output-box {
+      min-height: 220px;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      font-family: Consolas, monospace;
+      font-size: 17px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .flex-panel {
+      background: #f8f9fa;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .select-box,
+    .input-mini,
+    .input-text {
+      padding: 7px 10px;
+      border: 2px solid #adb5bd;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #333;
+      background: #fff;
+    }
+
+    .input-mini {
+      width: 60px;
+      text-align: center;
+    }
+
+    .input-text {
+      width: 140px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      opacity: 0.95;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-posisi { background: var(--dark); }
+    .btn-jumlah { background: var(--orange); }
+    .btn-paritas { background: var(--purple); }
+    .btn-besarkecil { background: var(--green); }
+    .btn-biji { background: var(--red); }
+    .btn-logika { background: var(--blue); }
+    .btn-copycat { background: #e67e22; }
+    .btn-range { background: var(--amber); }
+
+    .btn-twn {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      background: var(--gold);
+      color: #2c3e50;
+      border: 2px solid var(--amber);
+      box-shadow: 0 4px 12px rgba(241, 196, 15, 0.25);
+      margin-bottom: 8px;
+    }
+
+    .btn-twn:hover {
+      background: var(--amber);
+      color: white;
+    }
+
+    .btn-copy-main {
+      background: var(--success);
+      width: 100%;
+      margin-top: 10px;
+      font-size: 14px;
+      padding: 12px;
+    }
+
+    .btn-reset {
+      background: var(--danger);
+      width: 100%;
+      margin-top: 10px;
+      font-size: 14px;
+      padding: 12px;
+    }
+
+    .btn-primary {
+      background: #007bff;
+    }
+
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #495057;
+    }
+
+    .note {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: #dee2e6;
+      margin: 5px 0;
+    }
+
+    @media (max-width: 980px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="wrapper">
+    <div class="page-title">TOOLS ANGKA 4D</div>
+    <div class="top-note">
+      Gabungan fitur <strong>Filter Angka 4D</strong> dan <strong>Balik Urutan Angka 4 Digit</strong> dalam satu halaman.
+    </div>
 
-<h1>Analisis 4-Digit (10 Pendekatan, 4 Opsi) - Perbaikan Hide/Show</h1>
+    <div class="grid-layout">
+      <!-- KOLOM KIRI: FILTER -->
+      <div class="card">
+        <h2>FILTER ANGKA 4D - MASTER BUILDER PRO</h2>
 
-<!-- SECTION: Input Data & Proses -->
-<div class="section">
-  <h2>Data Input</h2>
-  <textarea id="inputData" rows="5" placeholder="misal:\n6998\n5379\n3454\n4707\n3880\n2047"></textarea>
-  <br/>
-  <label for="inputCount">Jumlah baris (chunk) dari bawah:</label>
-  <input type="number" id="inputCount" placeholder="3" />
-  <button onclick="prosesData()">Proses Data</button>
-  <button onclick="analyzeOutputs()">Analisa Keluaran</button>
-</div>
+        <span class="section-label">Input Data Filter (pemisah *)</span>
+        <textarea id="inputTeks" placeholder="Tempelkan deretan angka 4D Anda di sini..." oninput="inisialisasiData()"></textarea>
 
-<!-- BAGIAN: Hasil Analisis (Pendekatan & Opsi) => Hide/Show -->
-<div class="section">
-  <h2>
-    Hasil Analisis (Pendekatan &amp; Opsi)
-    <button class="toggle-btn" onclick="toggleVisibility('analysisOutput')">Hide/Show</button>
-  </h2>
-  <!-- Default ditampilkan (display:block) -->
-  <div id="analysisOutput" style="display:block;"></div>
-</div>
+        <span class="section-label" style="color: var(--orange); font-size: 14px;">⚡ Tombol Pintas (Macro)</span>
+        <button class="btn-twn" onclick="eksekusiFilter('TWN')">
+          🚀 EKSEKUSI TWN (Auto Hapus: Paritas Ekstrim + Total &lt;10/&gt;26 + Range &lt;4)
+        </button>
 
-<!-- BAGIAN: Hasil Analisa Keluaran => Hide/Show, 
-     TAPI RINGKASAN (Kecocokan Digit) TETAP SELALU TAMPIL -->
-<div class="section">
-  <h2>
-    Hasil Analisa Keluaran (Hanya Pendekatan &amp; Opsi yang SAMA Digit)
-    <button class="toggle-btn" onclick="toggleVisibility('analysisCompareMatch')">Hide/Show</button>
-  </h2>
-  <!-- Bagian "Sama Digit" -->
-  <div id="analysisCompareMatch" style="display:block;"></div>
+        <span class="section-label">1. Posisi Kembar (Twin)</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--dark);">
+          Hapus jika
+          <select id="pos1" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2">Kepala</option>
+            <option value="3">Ekor</option>
+          </select>
+          sama dengan
+          <select id="pos2" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2">Kepala</option>
+            <option value="3" selected>Ekor</option>
+          </select>
+          <button class="btn-posisi" onclick="eksekusiFilter('posisiSama')">Hapus Angka Sama</button>
+        </div>
 
-  <!-- Ringkasan Kecocokan Digit => SELALU TAMPIL, TIDAK DI-HIDE -->
-  <div id="analysisCompareSummary" style="margin-top:10px;"></div>
-</div>
+        <span class="section-label">2. Rentang Jumlah 2 Posisi</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--orange);">
+          Jumlah
+          <select id="sumP1" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2" selected>Kepala</option>
+            <option value="3">Ekor</option>
+          </select>
+          +
+          <select id="sumP2" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2">Kepala</option>
+            <option value="3" selected>Ekor</option>
+          </select>
+          | Hapus jika &lt;
+          <input type="number" id="sumMin" class="input-mini" value="11">
+          atau &gt;
+          <input type="number" id="sumMax" class="input-mini" value="25">
+          <button class="btn-jumlah" onclick="eksekusiFilter('jumlahRentang')">Hapus Rentang Ekstrim</button>
+        </div>
 
-<script>
-// ================ GLOBAL VARS ================
-let parsedResults = [];
+        <span class="section-label">3. Pola Ganjil & Genap</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--purple);">
+          Buang Pola:
+          <select id="polaParitas" class="select-box">
+            <option value="ekstrim">Ganjil Semua ATAU Genap Semua</option>
+            <option value="4g">Hanya Ganjil Semua (4G)</option>
+            <option value="4gnp">Hanya Genap Semua (4GnP)</option>
+            <option value="3g1gnp">3 Ganjil & 1 Genap</option>
+            <option value="1g3gnp">1 Ganjil & 3 Genap</option>
+            <option value="2g2gnp">2 Ganjil & 2 Genap</option>
+          </select>
+          <button class="btn-paritas" onclick="eksekusiFilter('paritas')">Eksekusi Ganjil/Genap</button>
+        </div>
 
-// ================ FUNGSI UTAMA ================
-function prosesData(){
-  const txt = document.getElementById('inputData').value.trim();
-  if(!txt){
-    alert("Masukkan data 4-digit dulu.");
-    return;
-  }
-  parsedResults=[];
-  const lines= txt.split(/\r?\n/);
-  lines.forEach(line=>{
-    const clean=line.trim();
-    if(/^\d{4}$/.test(clean)){
-      parsedResults.push(clean);
+        <span class="section-label">4. Pola Besar (5-9) & Kecil (0-4)</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--green);">
+          Buang Pola:
+          <select id="polaBesarKecil" class="select-box">
+            <option value="ekstrim">Besar Semua ATAU Kecil Semua</option>
+            <option value="4b">Hanya Besar Semua (4B)</option>
+            <option value="4k">Hanya Kecil Semua (4K)</option>
+            <option value="3b1k">3 Besar & 1 Kecil</option>
+            <option value="1b3k">1 Besar & 3 Kecil</option>
+            <option value="2b2k">2 Besar & 2 Kecil</option>
+          </select>
+          <button class="btn-besarkecil" onclick="eksekusiFilter('besarKecil')">Eksekusi Besar/Kecil</button>
+        </div>
+
+        <span class="section-label">5. Biji (Root) & Selisih (Jarak) Dinamis</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--red);">
+          Target Biji (2D Belakang):
+          <input type="number" id="inputBiji" class="input-mini" placeholder="0" min="1" max="9">
+          <button class="btn-biji" onclick="eksekusiFilter('bijiMati')">Hapus Biji & Tetangganya</button>
+
+          <div class="divider"></div>
+
+          Selisih
+          <select id="jarakP1" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2" selected>Kepala</option>
+            <option value="3">Ekor</option>
+          </select>
+          &
+          <select id="jarakP2" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2">Kepala</option>
+            <option value="3" selected>Ekor</option>
+          </select>
+          | Hapus jika hasilnya =
+          <input type="text" id="jarakList" class="input-text" value="0,7,8,9" placeholder="0,7,8,9">
+          <button class="btn-biji" style="background-color:#7f8c8d;" onclick="eksekusiFilter('jarakSpesifik')">Hapus Selisih</button>
+        </div>
+
+        <span class="section-label">6. Total Jumlahan 4 Digit & Pola Urut</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--blue);">
+          Total Keseluruhan | Hapus jika &lt;
+          <input type="number" id="totalMin" class="input-mini" value="10">
+          atau &gt;
+          <input type="number" id="totalMax" class="input-mini" value="26">
+          <button class="btn-logika" onclick="eksekusiFilter('total4DRentang')">Hapus Rentang Ekstrim</button>
+
+          <div class="divider"></div>
+
+          Target Total Sama Persis:
+          <input type="number" id="inputTotalSpesifik" class="input-mini" placeholder="16">
+          <button class="btn-logika" style="background-color:#1abc9c;" onclick="eksekusiFilter('totalSpesifik')">Hapus Jumlahan Ini</button>
+
+          <span style="color:#aaa;">|</span>
+
+          <button class="btn-logika" style="background-color:#34495e;" onclick="eksekusiFilter('antiTrio')">
+            Hapus Trio Berurutan (123x / x321)
+          </button>
+        </div>
+
+        <span class="section-label">7. Filter 2D Copycat (Jiplakan Spesifik)</span>
+        <div class="flex-panel" style="border-left: 4px solid #e67e22;">
+          Posisi
+          <select id="copyP1" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2" selected>Kepala</option>
+            <option value="3">Ekor</option>
+          </select>
+          dan
+          <select id="copyP2" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2">Kepala</option>
+            <option value="3" selected>Ekor</option>
+          </select>
+          | Hapus jika angkanya tepat:
+          <input type="text" id="inputCopycat" class="input-mini" placeholder="03" maxlength="2" style="width:65px;">
+          <button class="btn-copycat" onclick="eksekusiFilter('hapusCopycat')">Hapus Jiplakan</button>
+        </div>
+
+        <span class="section-label">8. Filter Range God Tier (Max - Min)</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--amber);">
+          Strategi God Tier | Hapus kombinasi jika Range (Angka Terbesar - Angka Terkecil) &lt;
+          <input type="number" id="inputRange" class="input-mini" value="4">
+          <button class="btn-range" onclick="eksekusiFilter('hapusRange')">Hapus Range Sempit</button>
+        </div>
+
+        <span class="section-label">Hasil Filter</span>
+        <div class="hasil-box" id="outputHasil">Menunggu data...</div>
+
+        <div class="status-bar">
+          <span>Sisa Kombinasi: <strong id="jumlahData" style="color:var(--success); font-size:16px;">0</strong> baris</span>
+          <span id="notif" style="color:#e67e22;"></span>
+        </div>
+
+        <button class="btn-copy-main" onclick="copyHasilFilter()">SALIN HASIL FILTER</button>
+        <button class="btn-reset" onclick="resetSemuaFilter()">RESET FILTER</button>
+      </div>
+
+      <!-- KOLOM KANAN: BALIK URUTAN -->
+      <div class="card">
+        <h2>Balik Urutan Angka 4 Digit</h2>
+
+        <div class="note">
+          Masukkan angka 4 digit yang dipisahkan spasi, enter, atau format campuran.
+          Hasil akan dibalik dari bawah ke atas dan ditampilkan vertikal.
+        </div>
+
+        <span class="section-label">Input Balik Urutan</span>
+        <textarea id="inputTextReverse" placeholder="Contoh:
+9688 4569 2115 1988 3842 1800 5491
+3673 2681 1396 2777 3534 3102 1131
+4324 0094"></textarea>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+          <button class="btn-primary" onclick="prosesDataReverse()">Proses</button>
+          <button class="btn-primary" onclick="copyHasilReverse()">Copy Hasil</button>
+          <button class="btn-reset" style="width:auto; margin-top:0;" onclick="clearAllReverse()">Clear</button>
+        </div>
+
+        <span class="section-label">Hasil Balik Urutan</span>
+        <div id="outputReverse" class="output-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // FILTER 4D
+    // =========================
+    let dataAktif = [];
+
+    function inisialisasiData() {
+      let teks = document.getElementById("inputTeks").value;
+      dataAktif = teks
+        .split("*")
+        .map(item => item.trim())
+        .filter(item => /^\d{4}$/.test(item));
+      tampilkanKeLayar();
     }
-  });
-  if(parsedResults.length===0){
-    alert("Tidak ada baris valid (4 digit).");
-    return;
-  }
 
-  // Tampilkan ringkasan 10 pendekatan
-  renderAnalysis();
-}
-
-function analyzeOutputs(){
-  if(parsedResults.length===0){
-    alert("Belum ada data valid. Klik 'Proses Data' dulu.");
-    return;
-  }
-  const count = parseInt(document.getElementById('inputCount').value)||0;
-  if(count<=0 || count>=parsedResults.length){
-    alert("Jumlah chunk minimal 1 & < total baris data.");
-    return;
-  }
-
-  const matchDiv = document.getElementById("analysisCompareMatch");
-  const summaryDiv = document.getElementById("analysisCompareSummary");
-
-  matchDiv.innerHTML="";
-  summaryDiv.innerHTML="";
-
-  // REKAP approachOptionPosCounts => [10 pendekatan][4 opsi][4 pos(A,B,C,D)]
-  let approachOptionPosCounts = [];
-  for(let p=0;p<10;p++){
-    approachOptionPosCounts[p]=[];
-    for(let o=0;o<4;o++){
-      approachOptionPosCounts[p][o]=[0,0,0,0];
+    function hitungBiji(n1, n2) {
+      let sum = n1 + n2;
+      if (sum === 0) return 0;
+      return (sum % 9 === 0) ? 9 : (sum % 9);
     }
-  }
 
-  // SLIDING
-  let analysisCount=0;
-  for(let i=(parsedResults.length-count-1); i>=0; i--){
-    let chunkStart=i+1;
-    let chunkEnd=i+1+count;
-    if(chunkEnd>parsedResults.length) continue;
+    function cekTrio(d) {
+      let dn = (d[1] === d[0] + 1 && d[2] === d[1] + 1);
+      let dt = (d[1] === d[0] - 1 && d[2] === d[1] - 1);
+      let bn = (d[2] === d[1] + 1 && d[3] === d[2] + 1);
+      let bt = (d[2] === d[1] - 1 && d[3] === d[2] - 1);
+      return dn || dt || bn || bt;
+    }
 
-    let chunkArr = parsedResults.slice(chunkStart, chunkEnd);
-    let lineToCompareStr = parsedResults[i];
-    let lineToCompareArr = lineToCompareStr.split("").map(x=>parseInt(x));
+    function eksekusiFilter(tipe) {
+      if (dataAktif.length === 0) {
+        alert("Tidak ada data untuk diproses!");
+        return;
+      }
 
-    let approachRes = getAllApproachCandidates(chunkArr);
+      const jumlahAwal = dataAktif.length;
 
-    let matchLines=[];
-    for(let p=0;p<10;p++){
-      let approachName = getApproachName(p);
-      let arrOpsi = approachRes[p];
-      for(let o=0;o<4;o++){
-        let candidate = arrOpsi[o];
-        if(!candidate) continue; 
-        // check same digits
-        let samePos = getSamePositions(candidate, lineToCompareArr);
-        if(samePos.length>0){
-          let posStr = samePos.map(posI => "ABCD"[posI]+":"+candidate[posI]).join(", ");
-          matchLines.push(`P#${p+1}(${approachName}) Opsi${o+1}: [${candidate.join(" ")}] => ${posStr}`);
-          // rekap
-          samePos.forEach(posI=>{
-            approachOptionPosCounts[p][o][posI]++;
-          });
+      let p1 = parseInt(document.getElementById("pos1").value);
+      let p2 = parseInt(document.getElementById("pos2").value);
+      let sp1 = parseInt(document.getElementById("sumP1").value);
+      let sp2 = parseInt(document.getElementById("sumP2").value);
+      let sumMin = parseInt(document.getElementById("sumMin").value);
+      let sumMax = parseInt(document.getElementById("sumMax").value);
+      let polaPar = document.getElementById("polaParitas").value;
+      let polaBK = document.getElementById("polaBesarKecil").value;
+      let biji = parseInt(document.getElementById("inputBiji").value);
+      let jp1 = parseInt(document.getElementById("jarakP1").value);
+      let jp2 = parseInt(document.getElementById("jarakP2").value);
+      let jarakListRaw = document.getElementById("jarakList").value;
+      let tMin = parseInt(document.getElementById("totalMin").value);
+      let tMax = parseInt(document.getElementById("totalMax").value);
+      let tSpesifik = parseInt(document.getElementById("inputTotalSpesifik").value);
+      let cp1 = parseInt(document.getElementById("copyP1").value);
+      let cp2 = parseInt(document.getElementById("copyP2").value);
+      let copycatStr = document.getElementById("inputCopycat").value.trim();
+      let valRange = parseInt(document.getElementById("inputRange").value);
+
+      if (tipe === "posisiSama" && p1 === p2) {
+        alert("Pilih 2 posisi berbeda!");
+        return;
+      }
+      if (tipe === "jumlahRentang" && sp1 === sp2) {
+        alert("Pilih 2 posisi berbeda untuk dijumlahkan!");
+        return;
+      }
+      if (tipe === "jarakSpesifik" && jp1 === jp2) {
+        alert("Pilih 2 posisi berbeda untuk dihitung selisihnya!");
+        return;
+      }
+      if (tipe === "hapusCopycat") {
+        if (cp1 === cp2) {
+          alert("Pilih 2 posisi yang berbeda untuk jiplakan!");
+          return;
+        }
+        if (copycatStr.length !== 2 || isNaN(parseInt(copycatStr))) {
+          alert("Masukkan tepat 2 angka jiplakan (contoh: 03)!");
+          return;
         }
       }
-    }
 
-    if(matchLines.length>0){
-      analysisCount++;
-      let box=`<div class="analysis-compare-box">`;
-      box+= `<strong>Analisa #${analysisCount}:</strong> ${lineToCompareStr}<br/>`;
-      matchLines.forEach(ml=>{
-        box+= ml+"<br/>";
+      dataAktif = dataAktif.filter(str => {
+        let d = str.split("").map(Number);
+        let ganjilCount = d.filter(n => n % 2 !== 0).length;
+        let besarCount = d.filter(n => n >= 5).length;
+        let totalSum = d.reduce((a, b) => a + b, 0);
+
+        let maxDigit = Math.max(...d);
+        let minDigit = Math.min(...d);
+        let range = maxDigit - minDigit;
+
+        switch (tipe) {
+          case "TWN":
+            let lolosParitas = (ganjilCount !== 0 && ganjilCount !== 4);
+            let lolosSum = (totalSum >= 10 && totalSum <= 26);
+            let lolosRange = (range >= 4);
+            return lolosParitas && lolosSum && lolosRange;
+
+          case "posisiSama":
+            return str[p1] !== str[p2];
+
+          case "jumlahRentang":
+            if (isNaN(sumMin) || isNaN(sumMax)) {
+              alert("Isi min & max Jumlah!");
+              return true;
+            }
+            let s = d[sp1] + d[sp2];
+            return s >= sumMin && s <= sumMax;
+
+          case "paritas":
+            if (polaPar === "ekstrim") return ganjilCount !== 0 && ganjilCount !== 4;
+            if (polaPar === "4g") return ganjilCount !== 4;
+            if (polaPar === "4gnp") return ganjilCount !== 0;
+            if (polaPar === "3g1gnp") return ganjilCount !== 3;
+            if (polaPar === "1g3gnp") return ganjilCount !== 1;
+            if (polaPar === "2g2gnp") return ganjilCount !== 2;
+            break;
+
+          case "besarKecil":
+            if (polaBK === "ekstrim") return besarCount !== 0 && besarCount !== 4;
+            if (polaBK === "4b") return besarCount !== 4;
+            if (polaBK === "4k") return besarCount !== 0;
+            if (polaBK === "3b1k") return besarCount !== 3;
+            if (polaBK === "1b3k") return besarCount !== 1;
+            if (polaBK === "2b2k") return besarCount !== 2;
+            break;
+
+          case "bijiMati":
+            if (isNaN(biji)) {
+              alert("Isi angka Biji!");
+              return true;
+            }
+            let b2d = hitungBiji(d[2], d[3]);
+            let k = biji - 1 < 1 ? 9 : biji - 1;
+            let n = biji + 1 > 9 ? 1 : biji + 1;
+            return b2d !== biji && b2d !== k && b2d !== n;
+
+          case "jarakSpesifik":
+            if (!jarakListRaw) {
+              alert("Isi angka selisih yang ingin dibuang!");
+              return true;
+            }
+            let arrJarak = jarakListRaw
+              .split(",")
+              .map(n => parseInt(n.trim()))
+              .filter(n => !isNaN(n));
+            let selisih = Math.abs(d[jp1] - d[jp2]);
+            return !arrJarak.includes(selisih);
+
+          case "total4DRentang":
+            if (isNaN(tMin) || isNaN(tMax)) {
+              alert("Isi min & max Total!");
+              return true;
+            }
+            return totalSum >= tMin && totalSum <= tMax;
+
+          case "totalSpesifik":
+            if (isNaN(tSpesifik)) {
+              alert("Isi angka target jumlah yang ingin dibuang!");
+              return true;
+            }
+            return totalSum !== tSpesifik;
+
+          case "antiTrio":
+            return !cekTrio(d);
+
+          case "hapusCopycat":
+            let targetD1 = parseInt(copycatStr[0]);
+            let targetD2 = parseInt(copycatStr[1]);
+            return !(d[cp1] === targetD1 && d[cp2] === targetD2);
+
+          case "hapusRange":
+            if (isNaN(valRange)) {
+              alert("Isi angka batas Range!");
+              return true;
+            }
+            return range >= valRange;
+
+          default:
+            return true;
+        }
       });
-      box+= `</div>`;
-      matchDiv.innerHTML+= box;
+
+      document.getElementById("notif").innerText = `Baru saja dihapus: ${jumlahAwal - dataAktif.length} kombinasi`;
+      tampilkanKeLayar();
     }
-  }
 
-  if(analysisCount===0){
-    matchDiv.innerHTML=`<div class="analysis-compare-box">Tidak ada baris yang sama digit.</div>`;
-  }
-
-  // RINGKASAN -> Tanpa "Terbanyak" / "Tersedikit"
-  let sumHtml = `<div class="match-summary-box">`;
-  sumHtml+= `<h4>Ringkasan Kecocokan Digit (10 Pendekatan, 4 Opsi)</h4>`;
-
-  for(let p=0;p<10;p++){
-    let approachName = getApproachName(p);
-    for(let o=0;o<4;o++){
-      // skip Pendekatan #1 Opsi2..4
-      if(p===0 && o>0) continue;
-
-      let arrPos= approachOptionPosCounts[p][o];
-      let sum= arrPos.reduce((a,b)=>a+b,0);
-      sumHtml+= `<p>`;
-      sumHtml+= `<strong>P#${p+1}(${approachName}) Opsi${o+1}: ${sum} total digit sama</strong><br/>`;
-      sumHtml+= `A=${arrPos[0]}, B=${arrPos[1]}, C=${arrPos[2]}, D=${arrPos[3]}`;
-      sumHtml+= `</p>`;
+    function tampilkanKeLayar() {
+      const output = document.getElementById("outputHasil");
+      document.getElementById("jumlahData").innerText = dataAktif.length;
+      output.innerText = dataAktif.length > 0 ? dataAktif.join("*") : "Data Kosong";
     }
-  }
-  sumHtml+= `</div>`;
 
-  // sisipkan ringkasan
-  summaryDiv.innerHTML+= sumHtml;
+    function resetSemuaFilter() {
+      document.getElementById("inputTeks").value = "";
+      dataAktif = [];
+      document.getElementById("notif").innerText = "";
+      document.getElementById("outputHasil").innerText = "Menunggu data...";
+      document.getElementById("jumlahData").innerText = "0";
+    }
 
-  // TAMBAHKAN "ANGKA 4 JARANG PER POSISI" (dari approachOptionPosCounts)
-  summaryDiv.innerHTML+= show4JarangFromRingkasan(approachOptionPosCounts);
-}
+    function copyHasilFilter() {
+      let text = document.getElementById("outputHasil").innerText;
+      if (text.includes("Menunggu") || text === "Data Kosong") return;
+      navigator.clipboard.writeText(text)
+        .then(() => alert("Hasil filter berhasil disalin ke clipboard!"))
+        .catch(() => alert("Gagal menyalin hasil filter."));
+    }
 
-// ============ FUNGSI "ANGKA 4 JARANG" DARI approachOptionPosCounts ============
-function show4JarangFromRingkasan(approachOptionPosCounts){
-  // Kita interpretasi "4 jarang" = 4 data (pendekatan, opsi) dgn nilai kecocokan terkecil
-  // per posisi (A/B/C/D).
-  // skip Pendekatan #1 Opsi2..4
-  const posName=["A","B","C","D"];
-  let html= `<div class="match-summary-box" style="margin-top:12px;">`;
-  html+= `<h4>Angka 4 Jarang pada Posisi (A/B/C/D)</h4>`;
+    // =========================
+    // BALIK URUTAN
+    // =========================
+    function prosesDataReverse() {
+      let input = document.getElementById("inputTextReverse").value.trim();
+      let angka4d = input.match(/\b\d{4}\b/g);
 
-  for(let pos=0; pos<4; pos++){
-    // kumpulkan (p,o,count)
-    let list=[];
-    for(let p=0; p<10; p++){
-      for(let o=0; o<4; o++){
-        if(p===0 && o>0) continue; // skip #1 Opsi2..4
-        let arrPos= approachOptionPosCounts[p][o];
-        if(!arrPos) continue;
-        let val= arrPos[pos];
-        list.push({p,o,count: val});
+      if (!angka4d || angka4d.length === 0) {
+        document.getElementById("outputReverse").textContent = "Tidak ada angka 4 digit yang valid.";
+        return;
       }
+
+      angka4d.reverse();
+      document.getElementById("outputReverse").textContent = angka4d.join("\n");
     }
-    // urut ascending by count
-    list.sort((a,b)=> a.count - b.count);
-    let slice4= list.slice(0,4);
 
-    html+= `<p>Posisi ${posName[pos]} - 4 jarang (nilai terendah):</p>`;
-    if(slice4.length===0){
-      html+= `<div>(Tidak ada data)</div>`;
-      continue;
+    function copyHasilReverse() {
+      let hasil = document.getElementById("outputReverse").textContent;
+      if (!hasil || hasil === "Tidak ada angka 4 digit yang valid.") {
+        alert("Belum ada hasil yang bisa disalin.");
+        return;
+      }
+
+      navigator.clipboard.writeText(hasil)
+        .then(() => alert("Hasil balik urutan berhasil disalin."))
+        .catch(() => alert("Gagal menyalin hasil."));
     }
-    slice4.forEach(item=>{
-      let approachName= getApproachName(item.p);
-      html+= `<div>- P#${item.p+1}(${approachName}) Opsi${item.o+1} => ${item.count}</div>`;
-    });
-  }
 
-  html+= `</div>`;
-  return html;
-}
-
-// ============ FUNGSI RENDER "Hasil Analisis (Pendekatan & Opsi)" ============
-function renderAnalysis(){
-  const container = document.getElementById('analysisOutput');
-  container.innerHTML="";
-
-  let allApproaches = getAllApproachCandidates(parsedResults);
-  let html=`<h3>10 Pendekatan (4 Opsi per Pendekatan) — #1 hanya 1 opsi</h3>`;
-  for(let p=0;p<allApproaches.length;p++){
-    let approachName= getApproachName(p);
-    let arrOpsi= allApproaches[p];
-    html+= `<div style="border:1px dashed #ccc; margin:8px 0; padding:5px;">`;
-    html+= `<strong>P#${p+1} - ${approachName}</strong><br/>`;
-    for(let o=0;o<4;o++){
-      let candidate= arrOpsi[o];
-      html+= `Opsi${o+1}: ${fmt4Digits(candidate)}<br/>`;
+    function clearAllReverse() {
+      document.getElementById("inputTextReverse").value = "";
+      document.getElementById("outputReverse").textContent = "";
     }
-    html+= `</div>`;
-  }
-
-  container.innerHTML= html;
-}
-
-// ============ HELPER ===============
-function toggleVisibility(id){
-  const el= document.getElementById(id);
-  if(el.style.display==='none'){
-    el.style.display='block';
-  } else {
-    el.style.display='none';
-  }
-}
-function getSamePositions(candidateArr, lineArr){
-  let out=[];
-  for(let i=0;i<4;i++){
-    if(candidateArr[i]===lineArr[i]) out.push(i);
-  }
-  return out;
-}
-function fmt4Digits(arr){
-  if(!arr||arr.length<4)return "A:- B:- C:- D:-";
-  return `A:${arr[0]} B:${arr[1]} C:${arr[2]} D:${arr[3]}`;
-}
-
-// ============ BERI NAMA BAGUS PDEKATAN #7-#10 ============
-// #7 => "Digit Parity Expansion"
-// #8 => "Half-Swap Variation"
-// #9 => "Digit-Sum Injection"
-// #10 => "Rolling Shifts"
-
-function getApproachName(pIndex){
-  switch(pIndex){
-    case 0: return "Frekuensi Posisi (1 Opsi)";
-    case 1: return "Delta";
-    case 2: return "Mirror";
-    case 3: return "Siklus";
-    case 4: return "Fixed Cross";
-    case 5: return "Rotasi & Sliding";
-    case 6: return "Digit Parity Expansion";
-    case 7: return "Half-Swap Variation";
-    case 8: return "Digit-Sum Injection";
-    case 9: return "Rolling Shifts";
-    default: return "???";
-  }
-}
-
-// ============ 10 Pendekatan (semua deterministik) ============
-function getAllApproachCandidates(dataArr){
-  let arr=[];
-  arr.push( approach1FreqPos1Opsi(dataArr) );  // #1
-  arr.push( approach2Delta4(dataArr) );        // #2
-  arr.push( approach3Mirror4(dataArr) );       // #3
-  arr.push( approach4Siklus4(dataArr) );       // #4
-  arr.push( approach5FixedCross4(dataArr) );   // #5
-  arr.push( approach6RotateSlide4(dataArr) );  // #6
-  arr.push( approach7ParityExpansion(dataArr) );     // #7
-  arr.push( approach8HalfSwap(dataArr) );            // #8
-  arr.push( approach9DigitSumInjection(dataArr) );   // #9
-  arr.push( approach10RollingShifts(dataArr) );      // #10
-  return arr;
-}
-
-// #1 => Frekuensi Posisi (1 Opsi)
-function approach1FreqPos1Opsi(dataArr){
-  if(dataArr.length<1)return [null,null,null,null];
-  let freqPos=[ Array(10).fill(0), Array(10).fill(0), Array(10).fill(0), Array(10).fill(0) ];
-  dataArr.forEach(dStr=>{
-    for(let i=0;i<4;i++){
-      freqPos[i][ parseInt(dStr[i]) ]++;
-    }
-  });
-  let arr1=[];
-  for(let i=0;i<4;i++){
-    let row= freqPos[i];
-    let minVal= Math.min(...row);
-    let cands=[];
-    for(let d=0; d<10; d++){
-      if(row[d]===minVal) cands.push(d);
-    }
-    if(cands.length===0) arr1.push(0);
-    else if(cands.length===1) arr1.push(cands[0]);
-    else {
-      cands.sort((a,b)=>a-b);
-      arr1.push(cands[0]);
-    }
-  }
-  return [arr1,null,null,null];
-}
-
-// #2 => Delta
-function approach2Delta4(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<2)return out;
-  let curr=dataArr[0];
-  let prev=dataArr[1];
-  let a1=[], a2=[], a3=[], a4=[];
-  for(let i=0;i<4;i++){
-    let cd=parseInt(curr[i]);
-    let pd=parseInt(prev[i]);
-    let delta=(cd-pd+10)%10;
-    a1.push((cd+delta)%10);
-    a2.push((cd-delta+10)%10);
-    a3.push((cd+ 2*delta)%10);
-    a4.push((cd- 2*delta+10)%10);
-  }
-  out[0]=a1; out[1]=a2; out[2]=a3; out[3]=a4;
-  return out;
-}
-// #3 => Mirror
-function approach3Mirror4(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  let digits=dataArr[0].split("").map(x=>parseInt(x));
-  if(digits.length<4)return out;
-
-  out[0]= [digits[3], digits[2], digits[1], digits[0]]; 
-  out[1]= [digits[1], digits[2], digits[3], digits[0]];
-  out[2]= [digits[3], digits[0], digits[1], digits[2]];
-  out[3]= [digits[1], digits[0], digits[3], digits[2]];
-  return out;
-}
-// #4 => Siklus
-function approach4Siklus4(dataArr){
-  let out=[null,null,null,null];
-  for(let i=1;i<=4;i++){
-    if(dataArr.length>=i+0){
-      out[i-1] = dataArr[i]? dataArr[i].split("").map(x=>parseInt(x)) : null;
-    }
-  }
-  return out;
-}
-// #5 => Fixed Cross
-function approach5FixedCross4(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  let f=dataArr[0].split("").map(x=>parseInt(x));
-  let l=dataArr[dataArr.length-1].split("").map(x=>parseInt(x));
-  out[0]= [f[0], l[1], f[2], l[3]];
-  out[1]= [l[0], f[1], l[2], f[3]];
-  out[2]= [f[0], f[1], l[2], l[3]];
-  out[3]= [l[0], l[1], f[2], f[3]];
-  return out;
-}
-// #6 => Rotasi & Sliding
-function approach6RotateSlide4(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  function rotate1(str4){
-    let [A,B,C,D]= str4.split("").map(x=>parseInt(x));
-    return [B,A,(C+1)%10,(D+9)%10];
-  }
-  function rotate2(str4){
-    let [A,B,C,D]= str4.split("").map(x=>parseInt(x));
-    return [(B+2)%10,(A+2)%10,(C+2)%10,(D+8)%10];
-  }
-  out[0]= rotate1(dataArr[0]);
-  if(dataArr.length>=2) out[1]= rotate1(dataArr[1]);
-  out[2]= rotate2(dataArr[0]);
-  if(dataArr.length>=2) out[3]= rotate2(dataArr[1]);
-  return out;
-}
-
-// #7 => Digit Parity Expansion
-function approach7ParityExpansion(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  let arr0=dataArr[0].split("").map(x=>parseInt(x));
-  let a1= arr0.map(d=> (d%2===0)? (d+1)%10 : d);
-  let a2= arr0.map(d=> (d%2!==0)? (d+2)%10 : d);
-  let a3= arr0.map(d=> (d%2===0)? (d+9)%10 : (d+1)%10);
-  let a4= arr0.map(d=> 9-d);
-  out[0]=a1; out[1]=a2; out[2]=a3; out[3]=a4;
-  return out;
-}
-
-// #8 => Half-Swap Variation
-function approach8HalfSwap(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  let arr0=dataArr[0].split("").map(x=>parseInt(x));
-  if(arr0.length<4)return out;
-
-  // Opsi1 => (C,D,A,B)
-  out[0]= [arr0[2],arr0[3],arr0[0],arr0[1]];
-  // Opsi2 => (C+1, D+1, A+1, B+1)
-  out[1]= [(arr0[2]+1)%10,(arr0[3]+1)%10,(arr0[0]+1)%10,(arr0[1]+1)%10];
-  // Opsi3 => (A+5, B+5, C+5, D+5) mod10
-  out[2]= [(arr0[0]+5)%10,(arr0[1]+5)%10,(arr0[2]+5)%10,(arr0[3]+5)%10];
-  // Opsi4 => (A, C, B, D)
-  out[3]= [arr0[0], arr0[2], arr0[1], arr0[3]];
-  return out;
-}
-
-// #9 => Digit-Sum Injection
-function approach9DigitSumInjection(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  let arr0=dataArr[0].split("").map(x=>parseInt(x));
-  let sumD= arr0.reduce((a,b)=>a+b,0);
-
-  let a1=[...arr0]; a1[0]=(a1[0]+sumD)%10;
-  let a2=[...arr0]; a2[1]=(a2[1]+sumD)%10;
-  let a3=[...arr0]; a3[2]=(a3[2]+sumD)%10;
-  let a4=[...arr0]; a4[3]=(a4[3]+sumD)%10;
-  out[0]= a1; out[1]= a2; out[2]= a3; out[3]= a4;
-  return out;
-}
-
-// #10 => Rolling Shifts
-function approach10RollingShifts(dataArr){
-  let out=[null,null,null,null];
-  if(dataArr.length<1)return out;
-  let arr0=dataArr[0].split("").map(x=>parseInt(x));
-  if(arr0.length<4)return out;
-
-  // Opsi1 => roll left by 1 => (B,C,D,A)
-  out[0]= [arr0[1],arr0[2],arr0[3],arr0[0]];
-  // Opsi2 => roll left by 2 => (C,D,A,B)
-  out[1]= [arr0[2],arr0[3],arr0[0],arr0[1]];
-  // Opsi3 => roll right by 1 => (D,A,B,C)
-  out[2]= [arr0[3],arr0[0],arr0[1],arr0[2]];
-  // Opsi4 => custom => (B,A,D,C)
-  out[3]= [arr0[1],arr0[0],arr0[3],arr0[2]];
-  return out;
-}
-</script>
-
+  </script>
 </body>
 </html>
