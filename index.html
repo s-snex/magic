@@ -24,6 +24,7 @@
       --success: #27ae60;
       --danger: #e74c3c;
       --violet: #6f42c1;
+      --pink: #9b59b6;
     }
 
     * {
@@ -214,6 +215,7 @@
     .btn-copycat { background: #e67e22; }
     .btn-range { background: var(--amber); }
     .btn-kandidat { background: var(--violet); }
+    .btn-digit-posisi { background: var(--pink); }
 
     .btn-twn {
       width: 100%;
@@ -313,11 +315,10 @@
   <div class="wrapper">
     <div class="page-title">TOOLS ANGKA 4D</div>
     <div class="top-note">
-      Input dan hasil sekarang dibuat dalam box scroll terpisah, jadi tidak perlu turun jauh saat data 10k line.
+      Input dan hasil dibuat dalam box scroll terpisah, jadi tidak perlu turun jauh saat data 10k line.
     </div>
 
     <div class="main-grid">
-      <!-- FILTER -->
       <div class="card">
         <h2>FILTER ANGKA 4D - MASTER BUILDER PRO</h2>
 
@@ -510,24 +511,55 @@
             Contoh Kandidat A: modulo 5, hapus residu 4
           </span>
         </div>
+
+        <span class="section-label">10. Filter Eliminasi Digit di Posisi Tertentu</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--pink);">
+          Pilih posisi:
+          <select id="digitPosisi" class="select-box">
+            <option value="0">As</option>
+            <option value="1">Kop</option>
+            <option value="2">Kepala</option>
+            <option value="3">Ekor</option>
+          </select>
+
+          Hapus digit:
+          <input
+            type="text"
+            id="digitBuang"
+            class="input-text"
+            value="6"
+            placeholder="contoh: 6 atau 6,8,9"
+            style="width:170px;"
+          >
+
+          <button class="btn-digit-posisi" onclick="eksekusiFilter('hapusDigitPosisi')">
+            Hapus Digit Posisi
+          </button>
+
+          <span style="width:100%; font-size:12px; color:#666;">
+            Contoh: pilih As, isi 6 → semua angka dengan digit As = 6 akan dihapus.
+          </span>
+        </div>
       </div>
 
-      <!-- PEMBALIK URUTAN -->
       <div class="card">
-        <h2>Angka 4 Digit</h2>
+        <h2>Balik Urutan Angka 4 Digit</h2>
 
         <div class="note">
+          Input dan hasil dibuat berdampingan. Untuk data ribuan line, cukup scroll di dalam box.
         </div>
 
         <div class="io-grid">
           <div>
-            <span class="section-label">Input</span>
+            <span class="section-label">Input Balik Urutan</span>
             <textarea id="inputTextReverse" class="input-fixed" placeholder="Contoh:
-"></textarea>
+9688 4569 2115 1988 3842 1800 5491
+3673 2681 1396 2777 3534 3102 1131
+4324 0094"></textarea>
           </div>
 
           <div>
-            <span class="section-label">Hasil</span>
+            <span class="section-label">Hasil Balik Urutan</span>
             <textarea id="outputReverse" class="reverse-output" readonly></textarea>
 
             <div class="button-row">
@@ -598,6 +630,9 @@
       let moduloBase = parseInt(document.getElementById("inputModuloBase").value);
       let moduloBuangRaw = document.getElementById("inputModuloBuang").value.trim();
 
+      let digitPosisi = parseInt(document.getElementById("digitPosisi").value);
+      let digitBuangRaw = document.getElementById("digitBuang").value.trim();
+
       if (tipe === "posisiSama" && p1 === p2) {
         alert("Pilih 2 posisi berbeda!");
         return;
@@ -625,9 +660,14 @@
           alert("Isi angka modulo minimal 2!");
           return;
         }
-
         if (!moduloBuangRaw) {
           alert("Isi residu yang ingin dibuang! Contoh: 4 atau 0,4");
+          return;
+        }
+      }
+      if (tipe === "hapusDigitPosisi") {
+        if (!digitBuangRaw) {
+          alert("Isi digit yang ingin dihapus! Contoh: 6 atau 6,8");
           return;
         }
       }
@@ -717,8 +757,16 @@
               .filter(n => !isNaN(n) && n >= 0 && n < moduloBase);
 
             if (arrResiduBuang.length === 0) return true;
-
             return !arrResiduBuang.includes(totalSum % moduloBase);
+
+          case "hapusDigitPosisi":
+            let arrDigitBuang = digitBuangRaw
+              .split(",")
+              .map(n => parseInt(n.trim()))
+              .filter(n => !isNaN(n) && n >= 0 && n <= 9);
+
+            if (arrDigitBuang.length === 0) return true;
+            return !arrDigitBuang.includes(d[digitPosisi]);
 
           default:
             return true;
