@@ -39,14 +39,14 @@
     }
 
     .wrapper {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
     .page-title {
       text-align: center;
       color: var(--text);
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       font-size: 28px;
       font-weight: 800;
     }
@@ -58,10 +58,11 @@
       font-size: 14px;
     }
 
-    .grid-layout {
+    .main-grid {
       display: grid;
-      grid-template-columns: 1.5fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 20px;
+      align-items: start;
     }
 
     .card {
@@ -90,8 +91,16 @@
       color: var(--text);
     }
 
+    .io-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
     textarea,
-    .output-area {
+    .text-area-fixed {
       width: 100%;
       border-radius: 10px;
       padding: 14px;
@@ -99,6 +108,8 @@
       border: 2px solid #ccc;
       outline: none;
       transition: 0.2s;
+      resize: none;
+      overflow: auto;
     }
 
     textarea:focus,
@@ -108,14 +119,15 @@
       outline: none;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 140px;
+    .input-fixed {
+      height: 280px;
       background: #fcfcfc;
+      font-family: Consolas, monospace;
+      line-height: 1.5;
     }
 
     .hasil-area {
-      min-height: 160px;
+      height: 280px;
       background: #212529;
       color: #00ff66;
       border-left: 5px solid var(--success);
@@ -123,18 +135,16 @@
       font-size: 16px;
       line-height: 1.5;
       white-space: pre-wrap;
-      resize: vertical;
     }
 
-    .output-area {
-      min-height: 220px;
+    .reverse-output {
+      height: 280px;
       background: #f8f9fa;
       border: 1px solid #ddd;
       font-family: Consolas, monospace;
       font-size: 17px;
       line-height: 1.6;
       white-space: pre-wrap;
-      resize: vertical;
     }
 
     .flex-panel {
@@ -273,9 +283,28 @@
       margin: 5px 0;
     }
 
-    @media (max-width: 980px) {
-      .grid-layout {
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .button-row button {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    @media (max-width: 1100px) {
+      .main-grid,
+      .io-grid {
         grid-template-columns: 1fr;
+      }
+
+      .input-fixed,
+      .hasil-area,
+      .reverse-output {
+        height: 220px;
       }
     }
   </style>
@@ -284,15 +313,35 @@
   <div class="wrapper">
     <div class="page-title">TOOLS ANGKA 4D</div>
     <div class="top-note">
-      Gabungan fitur <strong>Filter Angka 4D</strong> dan <strong>Balik Urutan Angka 4 Digit</strong> dalam satu halaman.
+      Input dan hasil sekarang dibuat dalam box scroll terpisah, jadi tidak perlu turun jauh saat data 10k line.
     </div>
 
-    <div class="grid-layout">
+    <div class="main-grid">
+      <!-- FILTER -->
       <div class="card">
         <h2>FILTER ANGKA 4D - MASTER BUILDER PRO</h2>
 
-        <span class="section-label">Input Data Filter (pemisah *)</span>
-        <textarea id="inputTeks" placeholder="Tempelkan deretan angka 4D Anda di sini..." oninput="inisialisasiData()"></textarea>
+        <div class="io-grid">
+          <div>
+            <span class="section-label">Input Data Filter (pemisah *)</span>
+            <textarea id="inputTeks" class="input-fixed" placeholder="Tempelkan deretan angka 4D Anda di sini..." oninput="inisialisasiData()"></textarea>
+          </div>
+
+          <div>
+            <span class="section-label">Hasil Filter</span>
+            <textarea id="outputHasil" class="hasil-area" readonly>Menunggu data...</textarea>
+
+            <div class="status-bar">
+              <span>Sisa Kombinasi: <strong id="jumlahData" style="color:var(--success); font-size:16px;">0</strong> baris</span>
+              <span id="notif" style="color:#e67e22;"></span>
+            </div>
+
+            <div class="button-row">
+              <button class="btn-copy-main" onclick="copyHasilFilter()">SALIN HASIL FILTER</button>
+              <button class="btn-reset" onclick="resetSemuaFilter()">RESET FILTER</button>
+            </div>
+          </div>
+        </div>
 
         <span class="section-label" style="color: var(--orange); font-size: 14px;">⚡ Tombol Pintas (Macro)</span>
         <button class="btn-twn" onclick="eksekusiFilter('TWN')">
@@ -461,41 +510,36 @@
             Contoh Kandidat A: modulo 5, hapus residu 4
           </span>
         </div>
-
-        <span class="section-label">Hasil Filter</span>
-        <textarea id="outputHasil" class="hasil-area" readonly>Menunggu data...</textarea>
-
-        <div class="status-bar">
-          <span>Sisa Kombinasi: <strong id="jumlahData" style="color:var(--success); font-size:16px;">0</strong> baris</span>
-          <span id="notif" style="color:#e67e22;"></span>
-        </div>
-
-        <button class="btn-copy-main" onclick="copyHasilFilter()">SALIN HASIL FILTER</button>
-        <button class="btn-reset" onclick="resetSemuaFilter()">RESET FILTER</button>
       </div>
 
+      <!-- PEMBALIK URUTAN -->
       <div class="card">
         <h2>Balik Urutan Angka 4 Digit</h2>
 
         <div class="note">
-          Masukkan angka 4 digit yang dipisahkan spasi, enter, atau format campuran.
-          Hasil akan dibalik dari bawah ke atas dan ditampilkan vertikal.
+          Input dan hasil dibuat berdampingan. Untuk data ribuan line, cukup scroll di dalam box.
         </div>
 
-        <span class="section-label">Input Balik Urutan</span>
-        <textarea id="inputTextReverse" placeholder="Contoh:
+        <div class="io-grid">
+          <div>
+            <span class="section-label">Input Balik Urutan</span>
+            <textarea id="inputTextReverse" class="input-fixed" placeholder="Contoh:
 9688 4569 2115 1988 3842 1800 5491
 3673 2681 1396 2777 3534 3102 1131
 4324 0094"></textarea>
+          </div>
 
-        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-          <button class="btn-primary" onclick="prosesDataReverse()">Proses</button>
-          <button class="btn-primary" onclick="copyHasilReverse()">Copy Hasil</button>
-          <button class="btn-reset" style="width:auto; margin-top:0;" onclick="clearAllReverse()">Clear</button>
+          <div>
+            <span class="section-label">Hasil Balik Urutan</span>
+            <textarea id="outputReverse" class="reverse-output" readonly></textarea>
+
+            <div class="button-row">
+              <button class="btn-primary" onclick="prosesDataReverse()">Proses</button>
+              <button class="btn-primary" onclick="copyHasilReverse()">Copy Hasil</button>
+              <button class="btn-reset" onclick="clearAllReverse()">Clear</button>
+            </div>
+          </div>
         </div>
-
-        <span class="section-label">Hasil Balik Urutan</span>
-        <textarea id="outputReverse" class="output-area" readonly></textarea>
       </div>
     </div>
   </div>
@@ -603,19 +647,15 @@
 
         switch (tipe) {
           case "TWN":
-            let lolosParitas = (ganjilCount !== 0 && ganjilCount !== 4);
-            let lolosSum = (totalSum >= 10 && totalSum <= 26);
-            let lolosRange = (range >= 4);
-            return lolosParitas && lolosSum && lolosRange;
+            return (ganjilCount !== 0 && ganjilCount !== 4) &&
+                   (totalSum >= 10 && totalSum <= 26) &&
+                   (range >= 4);
 
           case "posisiSama":
             return str[p1] !== str[p2];
 
           case "jumlahRentang":
-            if (isNaN(sumMin) || isNaN(sumMax)) {
-              alert("Isi min & max Jumlah!");
-              return true;
-            }
+            if (isNaN(sumMin) || isNaN(sumMax)) return true;
             let s = d[sp1] + d[sp2];
             return s >= sumMin && s <= sumMax;
 
@@ -626,7 +666,7 @@
             if (polaPar === "3g1gnp") return ganjilCount !== 3;
             if (polaPar === "1g3gnp") return ganjilCount !== 1;
             if (polaPar === "2g2gnp") return ganjilCount !== 2;
-            break;
+            return true;
 
           case "besarKecil":
             if (polaBK === "ekstrim") return besarCount !== 0 && besarCount !== 4;
@@ -635,23 +675,17 @@
             if (polaBK === "3b1k") return besarCount !== 3;
             if (polaBK === "1b3k") return besarCount !== 1;
             if (polaBK === "2b2k") return besarCount !== 2;
-            break;
+            return true;
 
           case "bijiMati":
-            if (isNaN(biji)) {
-              alert("Isi angka Biji!");
-              return true;
-            }
+            if (isNaN(biji)) return true;
             let b2d = hitungBiji(d[2], d[3]);
             let k = biji - 1 < 1 ? 9 : biji - 1;
             let n = biji + 1 > 9 ? 1 : biji + 1;
             return b2d !== biji && b2d !== k && b2d !== n;
 
           case "jarakSpesifik":
-            if (!jarakListRaw) {
-              alert("Isi angka selisih yang ingin dibuang!");
-              return true;
-            }
+            if (!jarakListRaw) return true;
             let arrJarak = jarakListRaw
               .split(",")
               .map(n => parseInt(n.trim()))
@@ -660,17 +694,11 @@
             return !arrJarak.includes(selisih);
 
           case "total4DRentang":
-            if (isNaN(tMin) || isNaN(tMax)) {
-              alert("Isi min & max Total!");
-              return true;
-            }
+            if (isNaN(tMin) || isNaN(tMax)) return true;
             return totalSum >= tMin && totalSum <= tMax;
 
           case "totalSpesifik":
-            if (isNaN(tSpesifik)) {
-              alert("Isi angka target jumlah yang ingin dibuang!");
-              return true;
-            }
+            if (isNaN(tSpesifik)) return true;
             return totalSum !== tSpesifik;
 
           case "antiTrio":
@@ -682,10 +710,7 @@
             return !(d[cp1] === targetD1 && d[cp2] === targetD2);
 
           case "hapusRange":
-            if (isNaN(valRange)) {
-              alert("Isi angka batas Range!");
-              return true;
-            }
+            if (isNaN(valRange)) return true;
             return range >= valRange;
 
           case "moduloCustom":
@@ -694,10 +719,7 @@
               .map(n => parseInt(n.trim()))
               .filter(n => !isNaN(n) && n >= 0 && n < moduloBase);
 
-            if (arrResiduBuang.length === 0) {
-              alert("Residu yang dibuang tidak valid!");
-              return true;
-            }
+            if (arrResiduBuang.length === 0) return true;
 
             return !arrResiduBuang.includes(totalSum % moduloBase);
 
