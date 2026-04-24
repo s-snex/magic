@@ -368,6 +368,15 @@
           <button class="btn-posisi" onclick="eksekusiFilter('posisiSama')">Hapus Angka Sama</button>
         </div>
 
+        <span class="section-label">1B. Angka Kembar Bergandengan</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--dark);">
+          Hapus angka jika ada digit sama yang berdempetan.
+          Contoh: 1233, 1145, 2445, 1122, 1111.
+          <button class="btn-posisi" onclick="eksekusiFilter('kembarBergandengan')">
+            Hapus Kembar Bergandengan
+          </button>
+        </div>
+
         <span class="section-label">2. Rentang Jumlah 2 Posisi</span>
         <div class="flex-panel" style="border-left: 4px solid var(--orange);">
           Jumlah
@@ -601,7 +610,7 @@
 
     function eksekusiFilter(tipe) {
       if (dataAktif.length === 0) {
-        alert("Tidak ada data untuk diproses!");
+        alert("Tidak ada data untuk diproses! Silakan tempel data dulu di kolom input.");
         return;
       }
 
@@ -690,6 +699,9 @@
 
           case "posisiSama":
             return str[p1] !== str[p2];
+
+          case "kembarBergandengan":
+            return !(str[0] === str[1] || str[1] === str[2] || str[2] === str[3]);
 
           case "jumlahRentang":
             if (isNaN(sumMin) || isNaN(sumMax)) return true;
@@ -785,11 +797,15 @@
     }
 
     function resetSemuaFilter() {
-      document.getElementById("inputTeks").value = "";
-      dataAktif = [];
+      let teks = document.getElementById("inputTeks").value;
+
+      dataAktif = teks
+        .split("*")
+        .map(item => item.trim())
+        .filter(item => /^\d{4}$/.test(item));
+
       document.getElementById("notif").innerText = "";
-      document.getElementById("outputHasil").value = "Menunggu data...";
-      document.getElementById("jumlahData").innerText = "0";
+      tampilkanKeLayar();
     }
 
     function copyHasilFilter() {
