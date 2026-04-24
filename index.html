@@ -504,6 +504,27 @@
           <button class="btn-range" onclick="eksekusiFilter('hapusRange')">Hapus Range Sempit</button>
         </div>
 
+        <span class="section-label">8B. Filter Span Fleksibel</span>
+        <div class="flex-panel" style="border-left: 4px solid var(--amber);">
+          Buang span:
+          <input
+            type="text"
+            id="inputSpanBuang"
+            class="input-text"
+            value="0,1,2,3"
+            placeholder="contoh: 0,1,2,3"
+            style="width:180px;"
+          >
+
+          <button class="btn-range" onclick="eksekusiFilter('spanFleksibel')">
+            Hapus Span
+          </button>
+
+          <span style="width:100%; font-size:12px; color:#666;">
+            Span = digit terbesar - digit terkecil. Contoh 1392 → 9 - 1 = 8. Isi 0,1,2,3 untuk menyisakan span 4–9.
+          </span>
+        </div>
+
         <span class="section-label">9. Filter Modulo Fleksibel</span>
         <div class="flex-panel" style="border-left: 4px solid var(--violet);">
           Modulo:
@@ -636,6 +657,8 @@
       let copycatStr = document.getElementById("inputCopycat").value.trim();
       let valRange = parseInt(document.getElementById("inputRange").value);
 
+      let spanBuangRaw = document.getElementById("inputSpanBuang").value.trim();
+
       let moduloBase = parseInt(document.getElementById("inputModuloBase").value);
       let moduloBuangRaw = document.getElementById("inputModuloBuang").value.trim();
 
@@ -646,14 +669,17 @@
         alert("Pilih 2 posisi berbeda!");
         return;
       }
+
       if (tipe === "jumlahRentang" && sp1 === sp2) {
         alert("Pilih 2 posisi berbeda untuk dijumlahkan!");
         return;
       }
+
       if (tipe === "jarakSpesifik" && jp1 === jp2) {
         alert("Pilih 2 posisi berbeda untuk dihitung selisihnya!");
         return;
       }
+
       if (tipe === "hapusCopycat") {
         if (cp1 === cp2) {
           alert("Pilih 2 posisi yang berbeda untuk jiplakan!");
@@ -664,6 +690,14 @@
           return;
         }
       }
+
+      if (tipe === "spanFleksibel") {
+        if (!spanBuangRaw) {
+          alert("Isi span yang ingin dibuang! Contoh: 0,1,2,3");
+          return;
+        }
+      }
+
       if (tipe === "moduloCustom") {
         if (isNaN(moduloBase) || moduloBase < 2) {
           alert("Isi angka modulo minimal 2!");
@@ -674,6 +708,7 @@
           return;
         }
       }
+
       if (tipe === "hapusDigitPosisi") {
         if (!digitBuangRaw) {
           alert("Isi digit yang ingin dihapus! Contoh: 6 atau 6,8");
@@ -690,6 +725,7 @@
         let maxDigit = Math.max(...d);
         let minDigit = Math.min(...d);
         let range = maxDigit - minDigit;
+        let span = range;
 
         switch (tipe) {
           case "TWN":
@@ -761,6 +797,15 @@
           case "hapusRange":
             if (isNaN(valRange)) return true;
             return range >= valRange;
+
+          case "spanFleksibel":
+            let arrSpanBuang = spanBuangRaw
+              .split(",")
+              .map(n => parseInt(n.trim()))
+              .filter(n => !isNaN(n) && n >= 0 && n <= 9);
+
+            if (arrSpanBuang.length === 0) return true;
+            return !arrSpanBuang.includes(span);
 
           case "moduloCustom":
             let arrResiduBuang = moduloBuangRaw
